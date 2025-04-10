@@ -1,0 +1,21 @@
+{
+    "Name": "Python AI Realtime",
+    "startDate": "2025-04-07",
+    "endDate": "2025-04-25",
+    "active": true,
+    "members": [
+      {
+        "name": "class1",
+        "age": 29,
+        "professor": "Dan Jukes",
+        "powers": ["총 자리", "사용 중인 자리", "남은 자리"]
+      },
+      {
+        "name": "class2",
+        "age": 39,
+        "professor": "Jane Wilson",
+        "powers": ["총 자리", "사용 중인 자리", "남은 자리"]
+      }
+    ]
+  }
+  

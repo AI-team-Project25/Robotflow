@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>실시간 영상 보기</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.10.4/mqtt.min.js"></script>
+  <style>
+    body {
+      text-align: center;
+      background-color: #111;
+      color: white;
+    }
+    img {
+      max-width: 100%;
+      border: 5px solid #555;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>실시간 영상</h1>
+  <img id="cameraView" alt="Live View" />
+
+  <script>
+    const broker = 'ws://localhost:9001';
+    const topic = '/camera/objects';
+
+    const client = mqtt.connect(broker);
+
+    client.on("connect", () => {
+      console.log("Connected to MQTT broker");
+      client.subscribe(topic);
+    });
+
+    client.on("message", (topic, message) => {
+      try {
+        const payload = JSON.parse(message.toString());
+        const base64Image = payload.image;
+        document.getElementById("cameraView").src = `data:image/jpg;base64,${base64Image}`;
+      } catch (e) {
+        console.error("영상 수신 실패:", e);
+      }
+    });
+  </script>
+</body>
+</html>

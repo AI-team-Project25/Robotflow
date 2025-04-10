@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.10.4/mqtt.min.js"></script>
+  <title>Object Test</title>
+  <style>
+    .seat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 80px); /* 4열 */
+      grid-template-rows: repeat(3, 80px);    /* 3행 */
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .seat {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #eee;ㅈ
+      border: 2px solid #333;
+      font-weight: bold;
+      font-size: 16px;
+      width: 80px;
+      height: 80px;
+      box-sizing: border-box;
+    }
+
+    .seat.empty {
+      background-color: green;
+    }
+    .seat.used {
+      background-color: red;
+    }
+    .seat.unknown {
+      background-color: #eee;
+    }
+    .seat.reserved {
+      background-color: yellow;
+    }
+
+  </style>
+</head>
+<body>
+<h1>객체 정보 페이지</h1>
+<a href="/"> 홈페이지 </a>
+
+<!-- 좌석표 (3행 x 4열) -->
+<div class="seat-grid">
+  <div class="seat" id="seat-0-0">A1</div>
+  <div class="seat" id="seat-0-1">A2</div>
+  <div class="seat" id="seat-0-2">A3</div>
+  <div class="seat" id="seat-0-3">A4</div>
+
+  <div class="seat" id="seat-1-0">B1</div>
+  <div class="seat" id="seat-1-1">B2</div>
+  <div class="seat" id="seat-1-2">B3</div>
+  <div class="seat" id="seat-1-3">B4</div>
+
+  <div class="seat" id="seat-2-0">C1</div>
+  <div class="seat" id="seat-2-1">C2</div>
+  <div class="seat" id="seat-2-2">C3</div>
+  <div class="seat" id="seat-2-3">C4</div>
+</div>
+
+<img id="frontImage" style="max-width: 400px; display: none;">
+<img id="backImage" style="max-width: 400px; display: none;">
+
+
+<script type="text/javascript">
+  const client = mqtt.connect('ws://localhost:9001');
+  let Objects = null;
+  let frontPrintDone = false; // 로그 첫 출력 여부
+  let backPrintDone = false; // 로그 첫 출력 여부
+  let frontImageDisplayed = true;
+  let backImageDisplayed = true;
+
+  client.on("connect", () => {
+    console.log("Connected");
+    client.subscribe('/camera/front');
+    client.subscribe('/camera/back');
+  });
+
+  client.on("message", (topic, message) => {
+    try {
+      const { objects, image } = JSON.parse(message.toString());
+      Objects = objects;
+
+      // 처음 수신했을 때만 한 번 출력
+      if (topic === '/camera/front' && !frontPrintDone && Objects) {
+        printObjects(topic);
+        frontPrintDone = true;
+      }
+
+      if (topic === '/camera/back' && !backPrintDone && Objects) {
+        printObjects(topic);
+        backPrintDone = true;
+      }
+
+      // 최초 1회만 이미지 출력
+      if (topic === '/camera/front' && !frontImageDisplayed && image) {
+        const img = document.getElementById("frontImage");
+        img.src = `data:image/jpg;base64,${image}`;
+        img.style.display = 'block';
+        frontImageDisplayed = true;
+      }
+
+      if (topic === '/camera/back' && !backImageDisplayed && image) {
+        const img = document.getElementById("backImage");
+        img.src = `data:image/jpg;base64,${image}`;
+        img.style.display = 'block';
+        backImageDisplayed = true;
+      }
+
+    } catch (e) {
+      console.error("Parse error:", e);
+    }
+  });
+
+  let filteredFrontObjects = [];
+  let filteredBackObjects = [];
+
+  let frontSeatMap = [];
+  let backSeatMap = [];
+
+  function getDistance(x1, y1, x2, y2) {
+    return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+  }
+
+  function printObjects(topic) {
+
+    if (topic === '/camera/front'){
+      console.log(`[${topic}]`, Objects);
+
+      if (Objects) {
+        console.log("Detected Front Objects :", Objects);
+        Objects.forEach((obj, i) => {
+          const [x1, y1, x2, y2] = obj.box;
+          const confidence = obj.confidence;
+
+          let found = false;
+
+          for (let i = 0; i < filteredFrontObjects.length; i++) {
+            const existing = filteredFrontObjects[i];
+            const [exX1, exY1, exX2, exY2] = existing.box;
+
+            const dist1 = getDistance(x1, y1, exX1, exY1);
+            const dist2 = getDistance(x2, y2, exX2, exY2);
+
+            if (dist1 <= 20 || dist2 <= 20) {
+              found = true;
+
+              // used 를 우선시하는 코드
+
+              const isNewUsed = obj.label === 'used';
+              const isExistingUsed = existing.label === 'used';
+
+              if (isNewUsed && !isExistingUsed) {
+                filteredFrontObjects[i] = obj;
+                console.log(`(updated) box=${obj.box}, label=used (priority over null)`);
+              } else if (!isNewUsed && isExistingUsed) {
+                console.log(`(skipped) box=${obj.box}, label=null < existing used`);
+              } else if (confidence > existing.confidence) {
+                filteredFrontObjects[i] = obj;
+                console.log(`(updated) box=${obj.box}, confidence=${obj.confidence}`);
+              } else {
+                console.log(`(skipped) box=${obj.box}, lower confidence`);
+              }
+
+              // confidence 만으로 비교하는 코드
+
+              // if (confidence > existing.confidence) {
+              //     filteredObjects[i] = obj;
+              //     console.log(`(updated) box=${obj.box}, confidence=${confidence}`);
+              // } else {
+              //     console.log(`(skipped) box=${obj.box}, lower confidence`);
+              // }
+
+
+              break;
+            }
+
+          }
+
+          if (!found) {
+            filteredFrontObjects.push(obj);
+            console.log(`(new) box=${obj.box}, confidence=${obj.confidence}`);
+          }
+        });
+      }
+      // 정렬: 앞줄부터, 좌측부터
+      // 1. y1 기준 오름차순으로 먼저 전체 정렬
+      filteredFrontObjects.sort((a, b) => a.box[1] - b.box[1]);
+
+      console.log("filtered Front Objects: ", filteredFrontObjects)
+
+// 2. y1 차이로 그룹핑 (순서는 모니터화면이 보이는 정방향 기준)
+      let rows = [];
+
+// 첫 번째 행 (y1 >= 221)
+      let row1 = filteredFrontObjects.filter(obj => obj.box[1] > 220);
+      if (row1.length > 0) rows.push(row1);
+
+// 두 번째 행 (141 <= y1 <= 220)
+      let row2 = filteredFrontObjects.filter(obj => obj.box[1] > 140 && obj.box[1] <= 220);
+      if (row2.length > 0) rows.push(row2);
+
+// 세 번째 행 (y1 <= 140)
+      let row3 = filteredFrontObjects.filter(obj => obj.box[1] <= 140);
+      if (row3.length > 0) rows.push(row3);
+
+
+
+// 3. 각 행에서 x1 기준으로 오름차순 정렬
+      rows.forEach(row => {
+        row.sort((a, b) => a.box[0] - b.box[0]);
+      });
+
+
+      const seatLabels = [
+        // C행
+        ['C4', 'C3', 'C2', 'C1'],
+        // B행
+        ['B4', 'B3', 'B2', 'B1'],
+        // C행
+        ['A4', 'A3', 'A2', 'A1']
+      ];
+
+      seatLabels.reverse().forEach((row, i) => {
+        seatLabels[i] = row.reverse();
+      });
+
+
+// 각 행에 대한 x1 범위
+      const xRangesPerRow = [
+        [ [100, 200], [250, 350], [400, 500], [500, 600] ], // A
+        [ [100, 200], [300, 400], [500, 600], [600, 700] ], // B
+        [ [200, 300], [500, 600], [700, 800], [900, 1000] ]  // C
+      ];
+
+      xRangesPerRow.reverse().forEach((row, i) => {
+        xRangesPerRow[i] = row.reverse();
+      });
+
+
+// 좌석 매핑 결과 저장용
+
+      rows.forEach((row, rowIndex) => {
+        const rowRanges = xRangesPerRow[rowIndex];
+        const rowSeats = Array(4).fill(null); // 좌석 4개
+
+        row.forEach(obj => {
+          const x1 = obj.box[0];
+          // 해당 행의 좌석 범위에 따라 좌석 위치 찾기
+          for (let i = 0; i < rowRanges.length; i++) {
+            const [min, max] = rowRanges[i];
+            if (x1 >= min && x1 <= max && !rowSeats[i]) {
+              rowSeats[i] = { label: seatLabels[rowIndex][i], ...obj };
+
+              break;
+            }
+          }
+        });
+
+        frontSeatMap.push(rowSeats);
+      });
+
+      console.log("frontSeatMap: ", frontSeatMap);
+
+    }
+
+
+    if (topic === '/camera/back'){
+      console.log(`[${topic}]`, Objects);
+
+      if (Objects) {
+        console.log("Detected Back Objects:", Objects);
+        Objects.forEach((obj, i) => {
+          const [x1, y1, x2, y2] = obj.box;
+          const confidence = obj.confidence;
+
+          // x1 값이 1200 이상이면 무시
+          if (x1 >= 1200) {
+            console.log(`(ignored) box=${obj.box}, x1 >= 1200`);
+            return;
+          }
+
+          let found = false;
+
+          for (let i = 0; i < filteredBackObjects.length; i++) {
+            const existing = filteredBackObjects[i];
+            const [exX1, exY1, exX2, exY2] = existing.box;
+
+            const dist1 = getDistance(x1, y1, exX1, exY1);
+            const dist2 = getDistance(x2, y2, exX2, exY2);
+
+            if (dist1 <= 20 || dist2 <= 20) {
+              found = true;
+
+              const isNewUsed = obj.label === 'used';
+              const isExistingUsed = existing.label === 'used';
+
+              if (isNewUsed && !isExistingUsed) {
+                filteredBackObjects[i] = obj;
+                console.log(`(updated) box=${obj.box}, label=used (priority over null)`);
+              } else if (!isNewUsed && isExistingUsed) {
+                console.log(`(skipped) box=${obj.box}, label=null < existing used`);
+              } else if (confidence > existing.confidence) {
+                filteredBackObjects[i] = obj;
+                console.log(`(updated) box=${obj.box}, confidence=${obj.confidence}`);
+              } else {
+                console.log(`(skipped) box=${obj.box}, lower confidence`);
+              }
+
+              break;
+            }
+
+          }
+
+          if (!found) {
+            filteredBackObjects.push(obj);
+            console.log(`(new) box=${obj.box}, confidence=${obj.confidence}`);
+          }
+        });
+      }
+      // 정렬: 앞줄부터, 좌측부터
+      // 1. y1 기준 오름차순으로 먼저 전체 정렬
+      filteredBackObjects.sort((a, b) => a.box[1] - b.box[1]);
+
+      console.log("filtered Back Objects: " , filteredBackObjects)
+
+// 2. y1 범위로 그룹핑
+      let rows = [];
+
+// 첫 번째 행 (200 <= y1 < 260)
+      let row1 = filteredBackObjects.filter(obj => obj.box[1] >= 200 && obj.box[1] < 260);
+      if (row1.length > 0) rows.push(row1);
+
+// 두 번째 행 (260 <= y1 < 380)
+      let row2 = filteredBackObjects.filter(obj => obj.box[1] >= 260 && obj.box[1] < 380);
+      if (row2.length > 0) rows.push(row2);
+
+// 세 번째 행 (380 <= y1)
+      let row3 = filteredBackObjects.filter(obj => obj.box[1] >= 380);
+      if (row3.length > 0) rows.push(row3);
+
+// 3. 각 행에서 x1 기준으로 오름차순 정렬
+      rows.forEach(row => {
+        row.sort((a, b) => a.box[0] - b.box[0]);
+      });
+
+      console.log("rows: ", rows)
+
+
+      const seatLabels = [
+        // A행
+        ['A1', 'A2', 'A3', 'A4'],
+        // B행
+        ['B1', 'B2', 'B3', 'B4'],
+        // C행
+        ['C1', 'C2', 'C3', 'C4']
+      ];
+
+// 각 행에 대한 x1 범위
+      const xRangesPerRow = [
+        [ [500, 600], [650, 750], [800, 900], [950, 1050] ], // A
+        [ [250, 350], [550, 650], [750, 850], [950, 1050] ], // B
+        [ [0, 100],   [300, 400], [650, 750], [1000, 1100] ]  // C
+      ];
+
+// 좌석 매핑 결과 저장용
+
+      rows.forEach((row, rowIndex) => {
+        const rowRanges = xRangesPerRow[rowIndex];
+        const rowSeats = Array(4).fill(null); // 좌석 4개
+
+        row.forEach(obj => {
+          const x1 = obj.box[0];
+          // 해당 행의 좌석 범위에 따라 좌석 위치 찾기
+          for (let i = 0; i < rowRanges.length; i++) {
+            const [min, max] = rowRanges[i];
+            if (x1 >= min && x1 <= max && !rowSeats[i]) {
+              rowSeats[i] = { label: seatLabels[rowIndex][i], ...obj };
+              break;
+            }
+          }
+        });
+
+        backSeatMap.push(rowSeats);
+      });
+
+      console.log("backSeatMap:", backSeatMap);
+
+    }
+
+    function getLabelPriority(label) {
+      if (label === 'used') return 2;
+      if (label) return 1; // 비식별(label은 존재하되 used가 아닌 경우)
+      return 0; // null 또는 undefined
+    }
+
+    function mergeSeatMaps(frontSeatMap, backSeatMap) {
+      const mergedSeatMap = [];
+
+      for (let row = 0; row < 3; row++) {
+        const mergedRow = [];
+
+        for (let col = 0; col < 4; col++) {
+          const frontSeat = frontSeatMap?.[row]?.[col] || null;
+          const backSeat = backSeatMap?.[row]?.[col] || null;
+
+          if (frontSeat && !backSeat) {
+            mergedRow.push(frontSeat);
+          } else if (!frontSeat && backSeat) {
+            mergedRow.push(backSeat);
+          } else if (frontSeat && backSeat) {
+            const frontPriority = getLabelPriority(frontSeat.label);
+            const backPriority = getLabelPriority(backSeat.label);
+
+            if (frontPriority > backPriority) {
+              mergedRow.push(frontSeat);
+            } else if (backPriority > frontPriority) {
+              mergedRow.push(backSeat);
+            } else {
+              // 같은 우선순위면 confidence 비교
+              mergedRow.push(
+                      frontSeat.confidence >= backSeat.confidence ? frontSeat : backSeat
+              );
+            }
+          } else {
+            mergedRow.push(null);
+          }
+        }
+
+        mergedSeatMap.push(mergedRow);
+      }
+
+      return mergedSeatMap;
+    }
+
+    async function setupSeats() {
+      const mergeSeatMap = mergeSeatMaps(frontSeatMap, backSeatMap);
+      console.log("Merged Seat Map:", mergeSeatMap);
+
+      try {
+        const res = await fetch('/reserve');
+        const data = await res.json();
+        console.log("✅ DB에서 가져온 예약 좌석 목록:", data);
+
+        // 예약 좌석을 mergeSeatMap에 반영
+        data.forEach(seat => {
+          const seatName = seat.seatName;
+          const rowChar = seatName[0]; // A, B, C...
+          const colNum = parseInt(seatName.slice(1), 10); // 1, 2, 3...
+
+          const rowIndex = rowChar.charCodeAt(0) - 'A'.charCodeAt(0); // 'A' -> 0
+          const colIndex = colNum - 1;
+
+          if (mergeSeatMap[rowIndex] && mergeSeatMap[rowIndex][colIndex]) {
+            mergeSeatMap[rowIndex][colIndex].label = seat.approved ? 'used' : 'reserved';
+          }
+        });
+
+        const finalSeatMap = mergeSeatMap;
+        console.log("🧩 최종시트맵", finalSeatMap);
+
+        const seatLabels = [
+          ['A1', 'A2', 'A3', 'A4'],
+          ['B1', 'B2', 'B3', 'B4'],
+          ['C1', 'C2', 'C3', 'C4']
+        ];
+
+        for (let row = 0; row < seatLabels.length; row++) {
+          for (let col = 0; col < seatLabels[row].length; col++) {
+            const seatId = `seat-${row}-${col}`;
+            const seatDiv = document.getElementById(seatId);
+            const seatInfo = finalSeatMap[row][col];
+
+            seatDiv.classList.remove('empty', 'used', 'unknown', 'reserved');
+
+            if (!seatInfo) {
+              seatDiv.classList.add('unknown');
+            } else if (seatInfo.label === 'used') {
+              seatDiv.classList.add('used');
+            } else if (seatInfo.label === 'null') {
+              seatDiv.classList.add('empty');
+            } else if (seatInfo.label === 'reserved') {
+              seatDiv.classList.add('reserved');
+            } else {
+              seatDiv.classList.add('unknown');
+            }
+          }
+        }
+
+      } catch (err) {
+        console.error("❌ 좌석 정보 불러오기 실패:", err);
+      }
+    }
+
+// 호출
+    setupSeats();
+
+
+  }
+
+</script>
+
+
+
+<script>
+  document.querySelectorAll('.seat').forEach(seat => {
+    seat.addEventListener('click', () => {
+      const seatName = seat.textContent; // 또는 innerText
+      // 'empty' 클래스가 있을 때만 반응
+      if (seat.classList.contains('empty')) {
+        if (confirm(`${seatName} 좌석을 예약하시겠습니까?`)) {
+
+          // AJAX로 서버에 예약정보 전송
+          fetch('/reserve', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ seatName })
+          })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.success) {
+                      alert("예약 성공!");
+                      seat.classList.remove('empty');
+                      seat.classList.add('reserved');
+                    } else {
+                      alert("예약 실패: " + data.message);
+                    }
+                  });
+
+        }
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Class 2 좌석 현황</title>
+  <link rel="stylesheet" href="class_style.css" />
+</head>
+<body>
+  <h1>Class 2 좌석 현황</h1>
+  <div id="seatGrid" class="grid"></div>
+
+  <button onclick="checkPasswordAndOpen()">실시간 영상 확인하기</button>
+
+  <script>
+    async function fetchSeatStatus() {
+      const res = await fetch('../seats_status.json');
+      const data = await res.json();
+      return data.class2;
+    }
+
+    async function renderSeats() {
+      const seatData = await fetchSeatStatus();
+      const grid = document.getElementById('seatGrid');
+      grid.innerHTML = ''; // 초기화
+
+      const seatOrder = [
+        "a1", "a2", "a3", "a4",
+        "b1", "b2", "b3", "b4",
+        "c1", "c2", "c3", "c4"
+      ];
+
+      seatOrder.forEach(seatId => {
+        const seatDiv = document.createElement('div');
+        seatDiv.className = `seat ${seatData[seatId]}`;
+        seatDiv.textContent = seatId.toUpperCase();
+        grid.appendChild(seatDiv);
+      });
+    }
+
+    function checkPasswordAndOpen() {
+      const password = prompt("비밀번호를 입력하세요:");
+      if (password === 'admin') {
+        window.location.href = "class2_cam.html";
+      } else {
+        alert("비밀번호가 틀렸습니다.");
+      }
+    }
+
+    renderSeats();
+    setInterval(renderSeats, 10000); // 10초마다 갱신
+  </script>
+</body>
+</html>

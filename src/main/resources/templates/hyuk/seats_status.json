@@ -1,0 +1,13 @@
+{
+    "class1": {
+      "a1": "used", "a2": "null", "a3": "used", "a4": "null",
+      "b1": "null", "b2": "null", "b3": "used", "b4": "null",
+      "c1": "null", "c2": "null", "c3": "used", "c4": "null"
+    },
+    "class2": {
+      "a1": "used", "a2": "null", "a3": "used", "a4": "null",
+      "b1": "null", "b2": "null", "b3": "used", "b4": "used",
+      "c1": "used", "c2": "null", "c3": "used", "c4": "used"
+    }
+}
+  
