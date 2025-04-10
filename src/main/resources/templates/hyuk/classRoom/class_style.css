@@ -1,0 +1,27 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 80px);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .seat {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .seat.used {
+    background-color: #444;
+  }
+  
+  .seat.null {
+    background-color: #ccc;
+    color: #333;
+  }
+  
