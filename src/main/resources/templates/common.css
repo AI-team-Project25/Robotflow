@@ -1,0 +1,41 @@
+@ media all and (max-width:1065px)and(min-width:801px) {
+
+}
+@ media all and (max-width:800px) {
+
+}
+@ media all and (max-width:320px) {
+
+}
+@charset "utf-8";
+@import url('layout_base.css');
+/* reset element*/
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym,
+address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small. strike, strong, sub, sup, tt, var,
+b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, button, table, caption, tbody, tfoot,
+thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu,
+nav, output, ruby, section, summary, time, mark, audio, video {
+    margin: 0; padding: 0;
+}
+h1, h2, h3, h4, h5, h6 {font-weight: normal; font-size: inherit;}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {display: block;}
+body {line-height: 1;}
+blockquote, q {quotes: none;}
+blockquote:before, blockquote:after, q:before, q:after {content: ''; content: none;}
+/* align, border, input */
+img, fieldset, a {border: none;}
+img {vertical-align: middle;}
+table, thead, tbody, tfoot {border-collapse: collapse; border-spacing: 0; border: 0 none;}
+ul, ol, li {list-style: none;}
+address, em{font-style: normal;}
+input, select, textarea, button, form img, label {vertical-align: middle;}
+.skipnavi {position: absolute; left: 0; top: -50px; text-indent: -9999px; font-size: 0; width: 100%; z=index: 999;}
+.skipnavi li a:focus,
+.skipnavi li a:active {position: absolute; left: 0; top: 50px; display: block; width: 100%; padding: 5px 0;
+text-align: center; text-indent: 0px; font-size: 12px; font-weight: bold; background: #f2f2f2;}
+/* anchor */
+a {text-decoration: none;}
+a:link {color: #444;}
+a:visited {color: #444;}
+a:hover {color: #444;}
+a:focus {color:#444;}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>signup</title>
+    <style>
+        .appForm {margin: 40px auto 0;}
+        .appForm .info_pilsoo {position: relative; padding-left: 20px; padding-bottom: 10px;
+            border-bottom: 2px solid #000; font-size: 15px; color: #f00;}
+        .appForm .pilsoo_item:before {content: "*"; display: inline-block; position: absolute;
+            left: 5px; top: 3px; width: 15px; font-weight: bold; font-size: 17px; color: #f00;}
+        .appForm .app_list {padding: 10px 0; border-bottom: 1px solid #ccc;}
+        .appForm .app_list li {padding: 8px 0;}
+        .appForm .app_list li .tit_lbl { position: relative; float: left; width: 150px;
+            box-sizing: border-box; padding-left: 20px; line-height: 42px; font-weight: bold;
+            font-size: 17px; letter-spacing: -2px;}
+        .appForm .app_list li .app_content {float: right; width: 770px;}
+        .appForm .app_list li .app_content * {vertical-align: top;}
+        .appForm .app_list li .app_content.email_area .ico_space {display: inline-block; padding-top: 10px;}
+        .appForm .app_list li .app_content.radio_area {height: 45px; box-sizing: border-box; padding-top: 12px;}
+        .appForm .app_list li .app_content.checkbox_area {height: 45px; box-sizing: border-box; padding-top: 12px;}
+        .appForm .app_list li .app_content label {vertical-align:middle;}
+        .appForm .app_list li .select_common {width: 160px; height: 45px; background-position: 100% 50%; border: 1px solid #ccc;}
+        .appForm .app_list li .select_common select {width: 200px; height: 43px;}
+        .appForm .app_list li textarea {height: 245px;}
+        .appForm .info_line {padding: 10px 10px 20px; font-size: 15px;}
+        .btn_line {padding: 20px 0;}
+        .btn_line a.btn_app {height: 37px; line-height: 37px; margin-left: 100px; font-size: 14px;}
+    </style>
+</head>
+<body>
+<!--bodytext_area-->
+<div class="bodytext_area box_inner">
+    <!-- appForm-->
+    <form action="#" class="appForm">
+        <fieldset>
+            <legend>상담문의 입력 양식</legend>
+            <p class="info_pilsoo pilsoo_item">필수입력</p>
+            <ul class="app_ilst">
+                <li class="clear">
+                    <label for="email_lbl" class="tit_pilsoo_item">이메일</label>
+                    <div class="app_content email_area">
+                        <input type="text" class="w160" id="email_lbl" title="이메일 주소" />
+                        <span class="ico+space">@</span>
+                        <input type="text" class="w160" title="이메일 제공업체 입력" />
+                        <div class="select_common">
+                            <select title="이메일 제공업체 목록">
+                                <option value="">직접 입력</option>
+                                <option value="">naver.com</option>
+                                <option value="">google.com</option>
+                            </select>
+                        </div>
+                    </div>
+                </li>
+                <li class="clear">
+                    <span class="tit_lbl">성별</span>
+                    <div class="app_content radio_area">
+                        <input type="radio" class="css-radio" id="mmm_lbl" name="gender">
+                        <label for="mmm_lbl">남</label>
+                        <input type="radio" class="css-radio" id="www_lbl" name="gender">
+                        <label for="www_lbl">여</label>
+                    </div>
+                </li>
+                <li class="clear">
+                    <span class="tit_lbl">개인정보 활용동의</span>
+                    <div class="app_content checkbox_area">
+                        <input type="checkbox" class="css-checkbox" id="agree_lbl" name="agree">
+                        <label for="agree_lbl">동의함</label>
+                    </div>
+                </li>
+                <li class="clear">
+                    <label for="content_lbl" class="tit_lbl">문의 내용</label>
+                    <div class="app_content">
+                        <textarea id="content_lbl" class="w100p" placeholder="간단한 상담 요청 사항을 남겨주시면 보다 상세한 상담이 가능합니다. 전화 상담 희망시 기재 부탁드립니다."></textarea>
+                    </div>
+                </li>
+            </ul>
+            <p class="btn_line"><a href="javascript:;" class="btn_baseColor">등록</a></p>
+        </fieldset>
+    </form>
+    <!-- //appForm-->
+</div>
+<!-- //bodytext_area -->
+</body>
+</html>
