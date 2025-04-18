@@ -6,48 +6,57 @@
   <link rel="stylesheet" href="/hyuk/css/class_style.css">
 </head>
 <body>
-  <h1>Class 2 좌석 현황</h1>
-  <div id="seatGrid" class="grid"></div>
+<h1>Class 2 좌석 현황</h1>
+<div id="seatGrid" class="grid"></div>
 
-  <button onclick="checkPasswordAndOpen()">실시간 영상 확인하기</button>
+<button onclick="checkPasswordAndOpen()">실시간 영상 확인하기</button>
 
-  <script>
-    async function fetchSeatStatus() {
-      const res = await fetch('../seats_status.json');
-      const data = await res.json();
-      return data.class2;
+<script>
+  // 현재 URL에서 class 번호를 동적으로 가져오기
+  const classNum = window.location.pathname.split('/')[2].replace('class', '');
+
+  // fetch로 좌석 상태 가져오기
+  async function fetchSeatStatus() {
+    const res = await fetch(`/api/class${classNum}/seats`);
+    const data = await res.json();
+    return data;
+  }
+
+  // 좌석을 화면에 렌더링
+  async function renderSeats() {
+    const seatData = await fetchSeatStatus();
+    const grid = document.getElementById('seatGrid');
+    grid.innerHTML = ''; // 좌석 초기화
+
+    const seatOrder = [
+      "a1", "a2", "a3", "a4",
+      "b1", "b2", "b3", "b4",
+      "c1", "c2", "c3", "c4"
+    ];
+
+    seatOrder.forEach(seatId => {
+      const seatDiv = document.createElement('div');
+      const status = seatData[seatId] || "null"; // 상태 처리
+      seatDiv.className = `seat ${status}`; // used 또는 null 클래스 부여
+      seatDiv.textContent = seatId.toUpperCase();
+      grid.appendChild(seatDiv);
+    });
+  }
+
+  // 비밀번호 입력 후 실시간 영상 보기
+  function checkPasswordAndOpen() {
+    const password = prompt("비밀번호를 입력하세요:");
+    if (password === 'admin') {
+        window.location.href = "/backlive"; // class2에서 backlive로 리디렉션
+    } else {
+      alert("비밀번호가 틀렸습니다.");
     }
+  }
 
-    async function renderSeats() {
-      const seatData = await fetchSeatStatus();
-      const grid = document.getElementById('seatGrid');
-      grid.innerHTML = ''; // 초기화
+  // 페이지 로드시 실행
+  renderSeats();
+  setInterval(renderSeats, 10000); // 10초마다 업데이트
+</script>
 
-      const seatOrder = [
-        "a1", "a2", "a3", "a4",
-        "b1", "b2", "b3", "b4",
-        "c1", "c2", "c3", "c4"
-      ];
-
-      seatOrder.forEach(seatId => {
-        const seatDiv = document.createElement('div');
-        seatDiv.className = `seat ${seatData[seatId]}`;
-        seatDiv.textContent = seatId.toUpperCase();
-        grid.appendChild(seatDiv);
-      });
-    }
-
-    function checkPasswordAndOpen() {
-      const password = prompt("비밀번호를 입력하세요:");
-      if (password === 'admin') {
-        window.location.href = "class2_cam.html";
-      } else {
-        alert("비밀번호가 틀렸습니다.");
-      }
-    }
-
-    renderSeats();
-    setInterval(renderSeats, 10000); // 10초마다 갱신
-  </script>
 </body>
 </html>

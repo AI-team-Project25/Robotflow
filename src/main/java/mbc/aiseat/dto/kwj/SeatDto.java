@@ -8,4 +8,5 @@ import lombok.Setter;
 public class SeatDto {
     private String seatName;
     private String reservedBy;
+
 }

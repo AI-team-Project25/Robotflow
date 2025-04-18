@@ -1,5 +1,6 @@
 package mbc.aiseat.controller.kwj;
 
+import lombok.extern.log4j.Log4j2;
 import mbc.aiseat.dto.kwj.SeatDto;
 import mbc.aiseat.entity.kwj.Seat;
 import mbc.aiseat.service.kwj.SeatService;

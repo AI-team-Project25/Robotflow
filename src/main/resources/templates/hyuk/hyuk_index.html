@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8">
   <title>AI 강의실 현황</title>
@@ -8,6 +8,9 @@
   <body>
     <header></header>
     <section></section>
+    <section>
+      <p>로그인 사용자: <span th:text="${username}">게스트</span></p>
+    </section>
     <script src="/hyuk/js/hyuk_script.js"></script> <!-- ✅ 경로 OK -->
   </body>
 </html>

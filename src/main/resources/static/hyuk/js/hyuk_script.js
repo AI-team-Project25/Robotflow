@@ -21,7 +21,7 @@ function populateHeader(obj) {
 }
 
 async function fetchSeatStatus() {
-  const res = await fetch('/hyuk/json/seats_status.json'); // ✅ 경로 수정
+  const res = await fetch(`/api/class${classNum}/seats`);
   return await res.json();
 }
 

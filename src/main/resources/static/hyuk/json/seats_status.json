@@ -1,13 +1,222 @@
 {
     "class1": {
-      "a1": "used", "a2": "null", "a3": "used", "a4": "null",
-      "b1": "null", "b2": "null", "b3": "used", "b4": "null",
-      "c1": "null", "c2": "null", "c3": "used", "c4": "null"
+        "a1": {
+            "status": "used",
+            "coordinates": [
+                421,
+                141,
+                553,
+                270
+            ]
+        },
+        "a2": {
+            "status": "null",
+            "coordinates": [
+                318,
+                135,
+                453,
+                282
+            ]
+        },
+        "a3": {
+            "status": "null",
+            "coordinates": [
+                194,
+                144,
+                364,
+                316
+            ]
+        },
+        "a4": {
+            "status": "null",
+            "coordinates": [
+                44,
+                161,
+                222,
+                365
+            ]
+        },
+        "b1": {
+            "status": "null",
+            "coordinates": [
+                313,
+                39,
+                412,
+                149
+            ]
+        },
+        "b2": {
+            "status": "null",
+            "coordinates": [
+                253,
+                46,
+                333,
+                155
+            ]
+        },
+        "b3": {
+            "status": "null",
+            "coordinates": [
+                132,
+                54,
+                256,
+                169
+            ]
+        },
+        "b4": {
+            "status": "null",
+            "coordinates": [
+                27,
+                71,
+                149,
+                186
+            ]
+        },
+        "c1": {
+            "status": "null",
+            "coordinates": [
+                241,
+                10,
+                316,
+                73
+            ]
+        },
+        "c2": {
+            "status": "null",
+            "coordinates": [
+                165,
+                10,
+                241,
+                79
+            ]
+        },
+        "c3": {
+            "status": "null",
+            "coordinates": [
+                94,
+                11,
+                166,
+                86
+            ]
+        },
+        "c4": {
+            "status": "null",
+            "coordinates": [
+                12,
+                13,
+                88,
+                94
+            ]
+        }
     },
     "class2": {
-      "a1": "used", "a2": "null", "a3": "used", "a4": "null",
-      "b1": "null", "b2": "null", "b3": "used", "b4": "used",
-      "c1": "used", "c2": "null", "c3": "used", "c4": "used"
+        "a1": {
+            "status": "null",
+            "coordinates": [
+                214,
+                157,
+                276,
+                243
+            ]
+        },
+        "a2": {
+            "status": "null",
+            "coordinates": [
+                281,
+                161,
+                349,
+                251
+            ]
+        },
+        "a3": {
+            "status": "null",
+            "coordinates": [
+                362,
+                164,
+                431,
+                262
+            ]
+        },
+        "a4": {
+            "status": "null",
+            "coordinates": [
+                441,
+                172,
+                525,
+                265
+            ]
+        },
+        "b1": {
+            "status": "null",
+            "coordinates": [
+                143,
+                216,
+                218,
+                341
+            ]
+        },
+        "b2": {
+            "status": "null",
+            "coordinates": [
+                231,
+                232,
+                305,
+                337
+            ]
+        },
+        "b3": {
+            "status": "null",
+            "coordinates": [
+                336,
+                244,
+                438,
+                354
+            ]
+        },
+        "b4": {
+            "status": "null",
+            "coordinates": [
+                454,
+                260,
+                548,
+                373
+            ]
+        },
+        "c1": {
+            "status": "null",
+            "coordinates": [
+                34,
+                333,
+                130,
+                498
+            ]
+        },
+        "c2": {
+            "status": "null",
+            "coordinates": [
+                125,
+                358,
+                264,
+                573
+            ]
+        },
+        "c3": {
+            "status": "null",
+            "coordinates": [
+                284,
+                366,
+                441,
+                590
+            ]
+        },
+        "c4": {
+            "status": "null",
+            "coordinates": [
+                464,
+                383,
+                595,
+                578
+            ]
+        }
     }
 }
-  
