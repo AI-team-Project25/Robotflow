@@ -2,61 +2,221 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>회원정보 수정/삭제</title>
+    <title>회원정보 수정</title>
+
+    <!-- ✅ Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%; /* 화면 높이에 맞게 콘텐츠를 맞춤 */
+            overflow: auto; /* 스크롤 숨기기 */
+            display: flex; /* 화면을 flex로 설정 */
+            flex-direction: column; /* 수직 방향으로 콘텐츠 배치 */
+            justify-content: flex-start;
+            flex-grow: 1;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* 콘텐츠가 상단에 배치되도록 설정 */
+            flex-grow: 1;
+        }
+        header {
+            flex-shrink: 0;
+        }
+        form {
+            width: 100%; /* 폼 너비 고정 (필요에 따라 조정) */
+            max-width: 400px;
+            border-radius: 8px;
+            padding: 30px;
+         }
+        .container {
+            width: 100%; /* 폼 너비 고정 (필요에 따라 조정) */
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 회원정보 주변 박스 만들기 */
+            max-width: 600px;
+            border-radius: 8px;
+            padding: 30px;
+            position: relative;
+            margin-bottom: 30px; /* 아래 여백 추가 */
+            overflow-y: hidden; /* 스크롤 제거 */
+            height: auto; /* 자동 높이 설정 */
+        }
+        .form-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* 수직 배치 */
+        }
+        /* form-group을 수직 정렬 */
+        .form-group {
+            display: flex;
+            flex-direction: column; /* 수평 배치 */
+            padding-bottom: 20px;
+        }
+
+        /* label의 스타일을 조정하여 글씨 아래로 내리기 */
+        .form-group label {
+            margin-bottom: 5px; /* label과 input 사이의 간격 */
+            text-align: left;
+        }
+        /* input 필드 스타일 */
+        .form-group input {
+            width: 250px; /* 입력 필드 너비 설정 */
+            padding: 5px; /* padding 추가로 필드 크기 조정 */
+            border-radius: 4px; /* 둥근 테두리 */
+            border: 1px solid #ccc; /* 테두리 스타일 */
+            box-sizing: border-box;
+        }
+        /* 수정 버튼 왼쪽 정렬 */
+        .button-row {
+            display: flex;
+            width: 100%;
+            margin-top: 10px;
+            justify-content: flex-start; /* 수정하기 버튼 왼쪽 정렬 */
+        }
+        /* 오른쪽 아래 탈퇴 버튼 고정 */
+        .absolute-delete-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+        h1 {
+            font-size: 20px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
         .error {
             color: red;
             font-size: 0.9em;
             margin-top: 4px;
         }
+        h2 {
+            font-size: 17px;
+        }
+        .btn {
+            white-space: nowrap;
+        }
     </style>
 </head>
+
 <body>
-<a href="/"> 홈페이지 </a>
-<h1>회원정보 수정/삭제</h1>
+<header>
+    <!-- 네비게이션 바-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">홈페이지</a>
 
-<!-- 소셜 연동 버튼 -->
-<div class="social-buttons" th:if="${!isLinked}">
-    <h2>소셜 계정 연동</h2>
-    <button type="button" onclick="openOAuthPopup('/oauth2/authorization/google')">구글 연동</button>
-    <button type="button" onclick="openOAuthPopup('/oauth2/authorization/naver')">네이버 연동</button>
-    <button type="button" onclick="openOAuthPopup('/oauth2/authorization/kakao')">카카오 연동</button>
+
+            <!-- 이 부분이 화면 크기가 작아지면 햄버거 메뉴로 변합니다. -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="navbarMenu">
+                <!-- 로그인된 사용자 환영 메시지 -->
+                <span class="navbar-text text-white me-3" sec:authorize="isAuthenticated()"
+                      th:text="${#authentication.principal.name} + '님 환영합니다.'"></span>
+
+
+                <!-- 로그인/회원가입 or 로그아웃/정보수정 -->
+                <ul class="navbar-nav flex-row">
+                    <li class="nav-item mx-2" sec:authorize="isAnonymous()">
+                        <a class="nav-link" href="/login">로그인</a>
+                    </li>
+                    <li class="nav-item mx-2" sec:authorize="isAnonymous()">
+                        <a class="nav-link" href="/signup">회원가입</a>
+                    </li>
+                    <li class="nav-item mx-2" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/edit">회원정보수정/탈퇴</a>
+                    </li>
+                    <li class="nav-item mx-2" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/logout">로그아웃</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- ✅ 전체를 가운데 정렬 -->
+<div class="container d-flex flex-column justify-content-center align-items-flex-start my-5">
+    <h1 style="margin-top: 30px;">회원정보 수정</h1>
+    <hr style="width: 100%; border: none; border-top: 2px solid #ccc; margin-top: 10px; margin-bottom: 30px;">
+
+    <!-- 소셜 연동 버튼 -->
+    <div class="social-buttons" th:if="${!isLinked}" style="margin-bottom: 30px;">
+        <h2>소셜 계정 연동</h2>
+        <button type="button" class="btn btn-outline-dark" onclick="openOAuthPopup('/oauth2/authorization/google')">구글 연동</button>
+        <button type="button" class="btn btn-outline-success" onclick="openOAuthPopup('/oauth2/authorization/naver')">네이버 연동</button>
+        <button type="button" class="btn btn-outline-warning" onclick="openOAuthPopup('/oauth2/authorization/kakao')">카카오 연동</button>
+    </div>
+
+    <!-- 소셜 연동 해제 버튼 -->
+    <div class="social-unlink" th:if="${isLinked}">
+        <h2>소셜 계정 연동 해제</h2>
+        <form th:if="${provider == 'google'}" th:action="@{/unlink}" method="post">
+            <input type="hidden" name="provider" value="google" />
+            <button type="submit">구글 연동 해제</button>
+        </form>
+
+        <form th:if="${provider == 'naver'}" th:action="@{/unlink}" method="post">
+            <input type="hidden" name="provider" value="naver" />
+            <button type="submit">네이버 연동 해제</button>
+        </form>
+
+        <form th:if="${provider == 'kakao'}" th:action="@{/unlink}" method="post">
+            <input type="hidden" name="provider" value="kakao" />
+            <button type="submit">카카오 연동 해제</button>
+        </form>
+    </div>
+
+    <main class="form-wrapper">
+        <!-- 회원정보 수정 폼-->
+        <form th:action="@{/edit}" th:object="${memberEditDto}" method="post" class="mb-3">
+            <!-- 이름 입력 필드 -->
+            <div class="form-group">
+                <label for="name">이름</label>
+                <input type="text" th:field="*{name}" id="name"/>
+                <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></p>
+            </div>
+
+            <!-- 이메일 입력 필드 -->
+            <div class="form-group">
+                <label for="email">아이디(e-mail)</label>
+                <input type="email" th:field="*{email}" readonly id="email"/>
+            </div>
+
+            <!-- 전화번호 입력 필드 -->
+            <div class="form-group">
+                <label for="phone">전화번호</label>
+                <input type="text" th:field="*{phone}" id="phone"/>
+                <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></p>
+            </div>
+
+            <!-- 수정 버튼 왼쪽 정렬 -->
+            <div class="button-row">
+                <button type="submit" class="btn btn-outline-success">수정하기</button>
+            </div>
+        </form>
+
+        <!-- 탈퇴 버튼을 오른쪽에 아래에 고정 -->
+        <div class="button-row d-flex justify-content-end">
+            <form class="w-auto" th:action="@{/delete}" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
+                <input type="hidden" th:name="memberId" th:value="${memberEditDto.memberId}" />
+                <button type="submit" class="btn btn-outline-danger">회원 탈퇴</button>
+            </form>
+        </div>
+    </main>
 </div>
 
-<!-- 소셜 연동 해제 버튼 -->
-<div class="social-unlink" th:if="${isLinked}">
-    <h2>소셜 계정 연동 해제</h2>
-    <form th:if="${provider == 'google'}" th:action="@{/unlink}" method="post">
-        <input type="hidden" name="provider" value="google" />
-        <button type="submit">구글 연동 해제</button>
-    </form>
-
-    <form th:if="${provider == 'naver'}" th:action="@{/unlink}" method="post">
-        <input type="hidden" name="provider" value="naver" />
-        <button type="submit">네이버 연동 해제</button>
-    </form>
-
-    <form th:if="${provider == 'kakao'}" th:action="@{/unlink}" method="post">
-        <input type="hidden" name="provider" value="kakao" />
-        <button type="submit">카카오 연동 해제</button>
-    </form>
-</div>
-
-<form th:action="@{/edit}" th:object="${memberEditDto}" method="post">
-    <label>이름: <input type="text" th:field="*{name}" /></label><br/>
-    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></p><br/>
-    <label>아이디(e-mail): <input type="email" th:field="*{email}" readonly /></label><br/>
-    <label>전화번호: <input type="text" th:field="*{phone}"/></label><br/>
-    <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="error"></p><br/>
-    <button type="submit">수정하기</button>
-</form>
-
-
-
-<form th:action="@{/delete}" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
-    <input type="hidden" th:name="memberId" th:value="${memberEditDto.memberId}" />
-    <button type="submit">회원 탈퇴</button>
-</form>
+<!-- ✅ Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 
